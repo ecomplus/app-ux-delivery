@@ -30,6 +30,7 @@ const fetchWaitingOrders = async ({ appSdk, storeId }) => {
         resolve()
         if (storeId === 1024) {
           appData.__order_settings = {
+            tracking_prefix: 'TIA',
             data: {
               sender: {
                 fullName: 'Tia Sonia',
@@ -52,17 +53,17 @@ const fetchWaitingOrders = async ({ appSdk, storeId }) => {
             }
           }
         }
-        const mandaeToken = appData.mandae_token
-        const mandaeOrderSettings = appData.__order_settings
-        if (mandaeToken && mandaeOrderSettings?.data) {
+        const uxToken = appData.ux_token
+        const uxOrderSettings = appData.__order_settings
+        if (uxToken && uxOrderSettings?.data) {
           const d = new Date()
           d.setDate(d.getDate() - 14)
           const endpoint = '/orders.json' +
             '?fields=_id,number,amount,fulfillment_status,shipping_lines' +
               ',shipping_method_label,buyers' +
-              ',items.sku,items.name,items.final_price,items.price,items.quantity' +
+              ',items.product_id,items.sku,items.name,items.final_price,items.price,items.quantity' +
             '&shipping_lines.app.carrier=Ux' +
-            '&shipping_lines.tracking_codes.tag!=Ux' +
+            '&shipping_lines.tracking_codes.tag!=ux_delivery' +
             '&financial_status.current=paid' +
             '&fulfillment_status.current=ready_for_shipping' +
             `&updated_at>=${d.toISOString()}` +
@@ -75,7 +76,7 @@ const fetchWaitingOrders = async ({ appSdk, storeId }) => {
               const order = orders[i]
               await exportOrder(
                 { appSdk, storeId, auth },
-                { order, mandaeToken, mandaeOrderSettings }
+                { order, uxToken, uxOrderSettings }
               )
             }
           } catch (_err) {
