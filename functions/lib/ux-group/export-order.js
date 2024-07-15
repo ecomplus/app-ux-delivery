@@ -19,7 +19,7 @@ const getEcomProduct = (appSdk, storeId, productId) => {
 
 module.exports = async (
   { appSdk, storeId, auth },
-  { order, uxToken, mandaeOrderSettings }
+  { order, uxToken, uxOrderSettings }
 ) => {
   const { number, items } = order
   const buyer = order.buyers?.[0]
@@ -32,7 +32,7 @@ module.exports = async (
     logger.warn(`Skipping #${storeId} ${number} without invoice data`)
     return
   }
-  const trackingId = (mandaeOrderSettings.tracking_prefix || '') +
+  const trackingId = (uxOrderSettings.tracking_prefix || '') +
     invoice.number.replace(/^0+/, '') +
     invoice.serial_number.replace(/^0+/, '')
   const lineTrackingCodes = shippingLine.tracking_codes || []
@@ -54,7 +54,7 @@ module.exports = async (
     return
   }
   logger.info(`Sending #${storeId} ${number} with tracking ID ${trackingId}`)
-  const { sender, cnpj } = mandaeOrderSettings.data
+  const { sender } = uxOrderSettings.data
   let sumWeight = 0
   if (items && items.length) {
     for (let i = 0; i < items.length; i++) {
@@ -85,7 +85,7 @@ module.exports = async (
     }
   }
   const data = { 
-    "cnpjEmbarcadorOrigem":cnpj,
+    "cnpjEmbarcadorOrigem":sender.document,
     "listaSolicitacoes":[ 
        { 
           "idSolicitacaoInterno": String(number),
