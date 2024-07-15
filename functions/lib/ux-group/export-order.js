@@ -2,11 +2,26 @@ const logger = require('firebase-functions/logger')
 const axios = require('axios')
 const ecomUtils = require('@ecomplus/utils')
 
+const getEcomProduct = (appSdk, storeId, productId) => {
+  const resource = `/products/${productId}.json`
+  return new Promise((resolve, reject) => {
+    appSdk.apiRequest(storeId, resource, 'GET', null, null, noAuth = true)
+      .then(({ response }) => {
+        resolve({ response })
+      })
+      .catch((err) => {
+        console.log(err.message)
+        console.log('erro na request api')
+        reject(err)
+      })
+  })     
+}
+
 module.exports = async (
   { appSdk, storeId, auth },
   { order, uxToken, mandaeOrderSettings }
 ) => {
-  const { number } = order
+  const { number, items } = order
   const buyer = order.buyers?.[0]
   if (!buyer) return
   const shippingLine = order.shipping_lines?.find(({ app }) => app?.carrier === 'Ux')
@@ -40,6 +55,35 @@ module.exports = async (
   }
   logger.info(`Sending #${storeId} ${number} with tracking ID ${trackingId}`)
   const { sender, cnpj } = mandaeOrderSettings.data
+  let sumWeight = 0
+  if (items && items.length) {
+    for (let i = 0; i < items.length; i++) {
+      await getEcomProduct(appSdk, storeId, items[i].product_id)
+      .then(({ response }) => {
+        const product = response.data
+        const { weight } = product
+        // parse cart items to kangu schema
+        let kgWeight = 0
+        if (weight && weight.value) {
+          switch (weight.unit) {
+            case 'g':
+              kgWeight = weight.value / 1000
+              break
+            case 'mg':
+              kgWeight = weight.value / 1000000
+              break
+            default:
+              kgWeight = weight.value
+          }
+          sumWeight += kgWeight
+        }
+      })
+      .catch(err => {
+        console.log(err.message)
+        console.error('deu erro ao buscar produto')
+      })
+    }
+  }
   const data = { 
     "cnpjEmbarcadorOrigem":cnpj,
     "listaSolicitacoes":[ 
