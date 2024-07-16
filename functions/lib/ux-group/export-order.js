@@ -133,7 +133,7 @@ module.exports = async (
       headers: { Authorization: `Basic ${uxToken}` },
       timeout: 7000
     })
-    if (response && response.data && response.data.mensagem === 'OK' && response.data.resultados &&  && response.data.resultados.length) {
+    if (response?.data?.mensagem === 'OK' && response.data.resultados?.length) {
       const result = response.data.resultados[0]
       console.log('order sent', order._id, number, result.idSolicitacaoGerada, result.idSolicitacaoInterno)
       const volume = result.listaVolumes && result.listaVolumes.length && result.listaVolumes[0]
