@@ -303,6 +303,7 @@ const app = {
 
 const procedures = []
 
+/*
 const { baseUri } = require('./__env')
 
 procedures.push({
@@ -310,10 +311,10 @@ procedures.push({
 
   triggers: [
     // Receive notifications when new order is created:
-/*     {
+    {
       resource: 'orders',
       action: 'create',
-    }, */
+    },
 
     // Receive notifications when order financial/fulfillment status are set or changed:
     // Obs.: you probably SHOULD NOT enable the orders triggers below and the one above (create) together.
@@ -336,6 +337,7 @@ procedures.push({
     }
   ]
 })
+*/
 
 exports.app = app
 
